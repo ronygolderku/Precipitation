@@ -1,0 +1,44 @@
+---
+title: "Extract more than multiple coordinate value using a raster data"
+---
+## Author: Md Rony Golder
+
+
+```{r Package installation}
+#Required pacakges
+library(raster) #install.packages('raster')
+library(ncdf4) #install.packages('ncdf4')
+```
+
+```{r read-netcdf}
+nc_pre <- nc_open("cru_ts4.06.1901.2021.pre.dat.nc")
+nc_pre
+```
+
+```{r load-ts_pre_data}
+# Load the CRU Time Series precipitation dataset into R
+pre <- brick("cru_ts4.06.1901.2021.pre.dat.nc", varname="pre")
+pre
+```
+```{r import-sample site}
+# Import sample site information
+samples <- read.csv("samples.csv", header=TRUE, row.names="site", fileEncoding = "UTF-8-BOM", sep=",")
+samples
+```
+```{r extract_data}
+#Now, extract command..
+pre.sites <- data.frame(extract(pre, samples, ncol=2)) # Precipitation
+head(pre.sites)
+# Add sample site names
+row.names(pre.sites) <- row.names(samples)
+```
+```{r sorting_writing}
+# Change column names
+years <- 1901:2021
+month <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+names(pre.sites) <- paste(rep(years, each=12), rep(month, times=121), sep="_")
+# Save the extracted climate data to a .csv file
+write.csv(pre.sites, file="extracted pre.csv")
+```
+
+Thanks...
